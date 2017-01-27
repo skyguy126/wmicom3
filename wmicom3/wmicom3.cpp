@@ -1,6 +1,3 @@
-// wmicom3.cpp : Defines the entry point for the console application.
-//
-
 #pragma comment(lib, "wbemuuid.lib")
 
 #define _WIN32_DCOM
@@ -17,7 +14,7 @@ using namespace std;
 
 extern "C" WMICOM3_API int wmicom(char *id)
 {
-	int port;
+	int port = -1;
 	HRESULT hres;
 
 	// Initialize COM.
@@ -151,37 +148,43 @@ extern "C" WMICOM3_API int wmicom(char *id)
 	IWbemClassObject *pclsObj;
 	ULONG uReturn = 0;
 
-	hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-
-	if (uReturn == 0)
+	while (pEnumerator) 
 	{
-		cout << "No devices found" << endl;
-		pSvc->Release();
-		pLoc->Release();
-		CoUninitialize();
-		return -1;
-	}
 
-	VARIANT vtProp;
+		hres = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
 
-	// Get the value of the Name property
-	hres = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
-	if (!vtProp.bstrVal == NULL)
-	{
-		wstring deviceName(vtProp.bstrVal, SysStringLen(vtProp.bstrVal));
-		wregex regex(L"[\\d][\\d]?[\\d]?");
-		wsmatch match;
-		regex_search(deviceName, match, regex);
-
-		if (match.size() == 1)
+		if (uReturn == 0)
 		{
-			wcout << "Port number: " << match[0].str() << endl;
-			port = stoi(match[0].str());
+			cout << "No devices found" << endl;
+			pSvc->Release();
+			pLoc->Release();
+			CoUninitialize();
+			return -1;
 		}
+
+		VARIANT vtProp;
+
+		// Get the value of the Name property
+		hres = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+		if (!vtProp.bstrVal == NULL)
+		{
+			wstring deviceName(vtProp.bstrVal, SysStringLen(vtProp.bstrVal));
+			wregex regex(L"[\\d][\\d]?[\\d]?");
+			wsmatch match;
+			regex_search(deviceName, match, regex);
+
+			if (match.size() == 1)
+			{
+				wcout << "Port number: " << match[0].str() << endl;
+				port = stoi(match[0].str());
+				break;
+			}
+		}
+
+		VariantClear(&vtProp);
 	}
 
 	// Cleanup
-	VariantClear(&vtProp);
 	pSvc->Release();
 	pLoc->Release();
 	CoUninitialize();
