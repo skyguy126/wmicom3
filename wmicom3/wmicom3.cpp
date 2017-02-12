@@ -155,7 +155,6 @@ extern "C" WMICOM3_API int wmicom(char *id)
 
 		if (uReturn == 0)
 		{
-			cout << "No devices found" << endl;
 			pSvc->Release();
 			pLoc->Release();
 			CoUninitialize();
@@ -175,7 +174,6 @@ extern "C" WMICOM3_API int wmicom(char *id)
 
 			if (match.size() == 1)
 			{
-				wcout << "Port number: " << match[0].str() << endl;
 				port = stoi(match[0].str());
 				break;
 			}
