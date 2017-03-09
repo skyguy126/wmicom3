@@ -119,7 +119,7 @@ extern "C" WMICOM3_API int wmicom(char *id)
 		return -1;
 	}
 
-	string base1 = "SELECT * FROM Win32_PnPEntity WHERE DeviceID LIKE '%";
+	string base1 = "SELECT * FROM Win32_SerialPort WHERE PNPDeviceID LIKE '%";
 	string idnum(id);
 	string base2 = "%'";
 	string query = base1 + idnum + base2;
